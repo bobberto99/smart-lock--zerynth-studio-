@@ -8,7 +8,6 @@ import KEYPAD
 import FOTORESISTORE
 import FUNZIONI
 import socket
-import streams
 from zdm import zdm
 from espressif.esp32net import esp32wifi as wifi_driver
 from wireless import wifi
@@ -60,25 +59,31 @@ print("led inizializzato")
 led.onblue()
 led.start_thread()
 led.start_blinking(200)
+
+
 sleep(1000)
 servo=SERVO.servo()
 print("servo inizializzato")
+
+
 sleep(1000)
 tastierino=KEYPAD.Keypad(D9,D13,D15,D2,D16,D4,D5,D22)
 print("tastierino inizializzato")
+
+
 sleep(1000)
 fotoresistore=FOTORESISTORE.fotoresistore()
 fotoresistore.start_thread()
 print("fotoresistore inizializzato")
-sleep(1000)
+
+
 print("componenti inizializzati")
-sleep(2000)
+
 FUNZIONI.set_componenti(servo,fotoresistore)
 
 #inizializzo il wifi
 
 print("inizializzo il driver del wifi")
-sleep(1000)
 wifi_driver.auto_init()
 print("driver wifi inizializzato")
 sleep(1000)
@@ -87,11 +92,12 @@ try:
     print("provo a connettermi al wifi")
     wifi.link(wifi_id,wifi.WIFI_WPA2,wifi_pass)
     print("connessione eseguita")
-    sleep(3000)
+    sleep(1000)
 
 except Exception as e:
     print("eccezione: ",e)
     connection=True
+    fail=True
 
 
 #inizializzo lo zdm
@@ -103,33 +109,38 @@ if connection==False:
         print("connessione zdm")
         zdmdevice.connect()
         print("connessione effettuata")
+        
+        #creo 3 condizioni per lo zdm
+        print("inizio definizione condizioni zdm")
+        
+        manomissionecond=zdmdevice.new_condition("stato")
+        chiusocond=zdmdevice.new_condition("stato")
+        apertocond=zdmdevice.new_condition("stato")
+        
+        print("fine definizione condizioni zdm")
+        FUNZIONI.set_zdmdevice(zdmdevice,manomissionecond,chiusocond,apertocond)
+
     except Exception as e:
         print("errore: ",e)
         fail=True
 
 
-    #creo 3 condizioni per lo zdm
-    print("inizio definizione condizioni zdm")
-    manomissionecond=zdmdevice.new_condition("stato")
-    chiusocond=zdmdevice.new_condition("stato")
-    apertocond=zdmdevice.new_condition("stato")
-    print("fine definizione condizioni zdm")
-    print("inizio spostamento variabili in FUNZIONI")
-    FUNZIONI.set_zdmdevice(zdmdevice,manomissionecond,chiusocond,apertocond)
-    print("fine spostamento variabili in FUNZIONI")
 
 
 
 
 if fail==False:
-    print("fail == false")
     payload={"stato" : "accesso eseguito"}
     tag="stato"
     zdmdevice.publish(payload, tag)
     print("prima publish completata")
+    
+    
     stato=FUNZIONI.chiudi_dispositivo(device=zdmdevice)
     print("dispositivo chiuso")
-    led.stop_blinking()                                                  #il led smette di lampeggiare
+    led.stop_blinking()                                     #il led smette di lampeggiare
+    
+    
     chr=""                                                  #variabile inizializzata per il check sotto
     thread(FUNZIONI.publish_thread,(zdmdevice))
     sleep(1000)
@@ -143,8 +154,10 @@ if fail==False:
         if (FUNZIONI.stato_dispositivo()!="aperto" and FUNZIONI.stato_dispositivo()!="manomesso"):
             if led.is_blinking()== True:
                 led.stop_blinking()
+            
             led.onblue()
             print("controllo richiesta inserimento password")
+            
             chr=tastierino.leggi_elemento()
             if(chr=='D'):
                 
@@ -164,6 +177,7 @@ if fail==False:
                     FUNZIONI.errore_accesso(zdmdevice)
                     print("fine segnalazione errore")
                     led.onblue()
+            
             FUNZIONI.controllo_manomissione(fotoresistore)
         
         
