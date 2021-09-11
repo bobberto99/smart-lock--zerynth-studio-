@@ -18,7 +18,7 @@ debouncetime=20
 
 class Keypad:
     #INIZIALIZZAZIONE DEL DISPOSITIVO, SUPPORTA SOLO KEYPAD A 4 RIGHE E COLONNE
-    def __init__(self, PIN08, PIN07, PIN06, PIN05, PIN04, PIN03, PIN02, PIN01):
+    def __init__(self, PIN08=D9, PIN07=D13, PIN06=D15, PIN05=D2, PIN04=D16, PIN03=D4, PIN02=D5, PIN01=D22):
         #Inizializzo le variabili globali che si riferiscono ai pin
         global PIN8,PIN7,PIN6,PIN5,PIN4,PIN3,PIN2,PIN1
         PIN8=PIN08

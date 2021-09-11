@@ -1,9 +1,3 @@
-# import the streams module, it is needed to send data around
-import streams
-
-# open the default serial port, the output will be visible in the serial console
-streams.serial()  
-
 import pwm
 motore=None
 

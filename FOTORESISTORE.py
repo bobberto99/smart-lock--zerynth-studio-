@@ -1,14 +1,14 @@
 import adc
-import streams
 import FUNZIONI
 
-def control_thread(fotoresistore):
+
+def control_thread(device):
     print("thread avviato!\n")
-    while fotoresistore.fine==False:
-        if(fotoresistore.valore_base < 10000 and FUNZIONI.stato_dispositivo()=="chiuso"):
-            fotoresistore.valore=fotoresistore.lettura_luce()
-            if fotoresistore.valore<fotoresistore.valore_base:
-                fotoresistore.allarme=True
+    while device.fotoresistore.fine==False:
+        if(device.fotoresistore.valore_base < 10000 and device.device_status()=="chiuso"):
+            valore=device.fotoresistore.lettura_luce()
+            if valore<device.fotoresistore.valore_base:
+                device.fotoresistore.allarme=True
         sleep(1000)
     print("fine thread lettura luce del fotoresistore\n")
 
@@ -30,10 +30,10 @@ class fotoresistore:
 
 
 
-    def start_thread(self):
+    def start_thread(self,device):
         self.fine=False
         print("avvio thread lettura luce del fotoresistore\n")
-        thread(control_thread, (self) )
+        thread(control_thread, (device) )
         print("thread lettura luce del fotoresistore avviato correttamente!")
 
 
@@ -43,7 +43,7 @@ class fotoresistore:
 
 
     def stop_allarm(self):
-        self.allarm=False
+        self.allarme=False
 
 
 
